@@ -1,4 +1,3 @@
-// test/videoSynthesis.test.ts
 import { expect } from "chai";
 import {
     Video,
@@ -10,8 +9,8 @@ import {
     generateAllMicroSequences,
     validateMicroSequences,
     generateVideoSequences,
-    MicroSequence, // 导入 MicroSequence 类型
-} from "../src/videoSynthesis"; // 注意路径是 "../src/videoSynthesis"
+    MicroSequence,
+} from "../src/videoSynthesis";
 
 describe("视频合成服务单元测试", () => {
     // 测试数据有效性检查
@@ -174,7 +173,7 @@ describe("视频合成服务单元测试", () => {
                     ],
                 },
             ];
-            const result = generateAllMicroSequences(data);
+            const result = generateAllMicroSequences(data, 10); // 目标数量为10
             expect(result.length).to.equal(6); // 2 * 3 = 6
         });
 
@@ -188,8 +187,29 @@ describe("视频合成服务单元测试", () => {
                     ],
                 },
             ];
-            const result = generateAllMicroSequences(data);
+            const result = generateAllMicroSequences(data, 10); // 目标数量为10
             expect(result.length).to.equal(0);
+        });
+
+        it("应返回不超过目标数量的微序列", () => {
+            const data: Lens[] = [
+                {
+                    lens: 1,
+                    duration: 2,
+                    videos: [
+                        { id: "video_1", path: "video_1.mp4", duration: 4 }, // 2个片段
+                    ],
+                },
+                {
+                    lens: 2,
+                    duration: 2,
+                    videos: [
+                        { id: "video_2", path: "video_2.mp4", duration: 6 }, // 3个片段
+                    ],
+                },
+            ];
+            const result = generateAllMicroSequences(data, 3); // 目标数量为3
+            expect(result.length).to.equal(3); // 返回前3个微序列
         });
     });
 
@@ -234,7 +254,7 @@ describe("视频合成服务单元测试", () => {
     describe("generateVideoSequences", () => {
         it("应在没有有效镜头数据时返回空数组", () => {
             const data: Lens[] = [];
-            const result = generateVideoSequences(data);
+            const result = generateVideoSequences(data, 10); // 目标数量为10
             expect(result.length).to.equal(0);
         });
 
@@ -255,8 +275,29 @@ describe("视频合成服务单元测试", () => {
                     ],
                 },
             ];
-            const result = generateVideoSequences(data);
+            const result = generateVideoSequences(data, 10); // 目标数量为10
             expect(result.length).to.equal(6); // 2 * 3 = 6
+        });
+
+        it("应返回不超过目标数量的微序列", () => {
+            const data: Lens[] = [
+                {
+                    lens: 1,
+                    duration: 2,
+                    videos: [
+                        { id: "video_1", path: "video_1.mp4", duration: 4 }, // 2个片段
+                    ],
+                },
+                {
+                    lens: 2,
+                    duration: 2,
+                    videos: [
+                        { id: "video_2", path: "video_2.mp4", duration: 6 }, // 3个片段
+                    ],
+                },
+            ];
+            const result = generateVideoSequences(data, 3); // 目标数量为3
+            expect(result.length).to.equal(3); // 返回前3个微序列
         });
     });
 });

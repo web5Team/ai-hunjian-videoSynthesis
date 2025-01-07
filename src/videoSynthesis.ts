@@ -1,6 +1,6 @@
 // src/videoSynthesis.ts
 
-// 定义类型
+// 定义并导出类型
 export type Video = {
     id: string;
     path: string;
@@ -96,13 +96,23 @@ export function cartesianProduct<T>(arrays: T[][]): T[][] {
 }
 
 // 生成所有可能的微序列
-export function generateAllMicroSequences(lensData: Lens[]): MicroSequence[] {
+export function generateAllMicroSequences(lensData: Lens[], targetCount: number): MicroSequence[] {
     const allSegments = generateAllSegments(lensData);
     if (allSegments.length === 0) {
         console.warn("警告：没有有效的片段数据");
         return [];
     }
-    return cartesianProduct(allSegments);
+
+    // 生成所有可能的组合
+    const allMicroSequences = cartesianProduct(allSegments);
+
+    // 如果目标数量大于所有可能的组合数量，则返回所有组合
+    if (targetCount >= allMicroSequences.length) {
+        return allMicroSequences;
+    }
+
+    // 否则返回前 targetCount 个组合
+    return allMicroSequences.slice(0, targetCount);
 }
 
 // 检查微序列合法性
@@ -126,7 +136,7 @@ export function validateMicroSequences(microSequences: MicroSequence[]): MicroSe
 }
 
 // 主函数
-export function generateVideoSequences(initialData: Lens[]): MicroSequence[] {
+export function generateVideoSequences(initialData: Lens[], targetCount: number): MicroSequence[] {
     // 1. 数据有效性检查
     const validLenses = validateData(initialData);
     if (validLenses.length === 0) {
@@ -135,7 +145,7 @@ export function generateVideoSequences(initialData: Lens[]): MicroSequence[] {
     }
 
     // 2. 生成所有可能的微序列
-    const allMicroSequences = generateAllMicroSequences(validLenses);
+    const allMicroSequences = generateAllMicroSequences(validLenses, targetCount);
 
     // 3. 检查微序列合法性
     const validSequences = validateMicroSequences(allMicroSequences);
