@@ -76,22 +76,34 @@ describe("视频合成服务单元测试", () => {
             const video: Video = { id: "video_1", path: "video_1.mp4", duration: 5 };
             const segments = generateSegmentsForVideo(video, 1);
             expect(segments.length).to.equal(2);
-            expect(segments[0].choose_time).to.equal("000-002");
-            expect(segments[1].choose_time).to.equal("002-004");
+            expect(segments[0].choose_time).to.deep.equal({
+                start: 0,
+                end: 2
+            });
+            expect(segments[1].choose_time).to.deep.equal({
+                start: 2,
+                end: 4
+            });
         });
 
         it("应为6秒视频生成3个片段", () => {
             const video: Video = { id: "video_1", path: "video_1.mp4", duration: 6 };
             const segments = generateSegmentsForVideo(video, 1);
             expect(segments.length).to.equal(3);
-            expect(segments[2].choose_time).to.equal("004-006");
+            expect(segments[2].choose_time).to.deep.eq({
+                start: 4,
+                end: 6,
+            });
         });
 
         it("应跳过结束时间超过视频时长的片段", () => {
             const video: Video = { id: "video_1", path: "video_1.mp4", duration: 3 };
             const segments = generateSegmentsForVideo(video, 1);
             expect(segments.length).to.equal(1);
-            expect(segments[0].choose_time).to.equal("000-002");
+            expect(segments[0].choose_time).to.deep.equal({
+                start: 0,
+                end: 2,
+            });
         });
     });
 
@@ -223,7 +235,10 @@ describe("视频合成服务单元测试", () => {
                         id: "video_1",
                         path: "video_1.mp4",
                         duration: 4,
-                        choose_time: "002-005", // 结束时间超过视频时长
+                        choose_time: {
+                            start: 0,
+                            end: 5,
+                        },
                         video_name: "lens_1_video_1.mp4",
                     },
                 ],
@@ -240,7 +255,10 @@ describe("视频合成服务单元测试", () => {
                         id: "video_1",
                         path: "video_1.mp4",
                         duration: 4,
-                        choose_time: "000-002", // 合法片段
+                        choose_time: {
+                            start: 0,
+                            end: 2,
+                        },
                         video_name: "lens_1_video_1.mp4",
                     },
                 ],
