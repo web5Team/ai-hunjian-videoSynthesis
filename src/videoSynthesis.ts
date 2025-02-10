@@ -54,17 +54,18 @@ export function validateData(data: Lens[]): Lens[] {
   return validLenses
 }
 
-// 生成一个视频的所有2秒片段
-export function generateSegmentsForVideo(video: Video, lensId: number): MicroSegment[] {
+// 生成一个视频的片段
+export function generateSegmentsForVideo(video: Video, len: Lens, maxSegments: number = 100): MicroSegment[] {
   const segments: MicroSegment[] = []
-  for (let startTime = 0; startTime <= video.duration - 2; startTime += 2) {
-    const endTime = startTime + 2
+  let segmentCount = 0
+  for (let startTime = 0; startTime <= video.duration - len.duration && segmentCount < maxSegments; startTime += len.duration) {
+    const endTime = startTime + len.duration
     if (endTime > video.duration) {
       console.warn(`警告：视频 ${video.id} 的结束时间 ${endTime} 超过视频时长，已跳过`)
       continue
     }
     segments.push({
-      lens: lensId,
+      lens: len.lens,
       id: video.id,
       path: video.path,
       duration: video.duration,
@@ -72,8 +73,9 @@ export function generateSegmentsForVideo(video: Video, lensId: number): MicroSeg
         start: Number.parseFloat(String(startTime).padStart(3, '0')),
         end: Number.parseFloat(String(endTime).padStart(3, '0'))
       },
-      video_name: `lens_${lensId}_video_${video.id}.mp4`
+      video_name: `lens_${len.lens}_video_${video.id}.mp4`
     })
+    segmentCount++
   }
   return segments
 }
@@ -83,7 +85,7 @@ export function generateAllSegments(lensData: Lens[]): MicroSegment[][] {
   return lensData.map((lens) => {
     const segments: MicroSegment[] = []
     for (const video of lens.videos) {
-      segments.push(...generateSegmentsForVideo(video, lens.lens))
+      segments.push(...generateSegmentsForVideo(video, lens))
     }
     return segments
   })
