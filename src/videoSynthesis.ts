@@ -91,34 +91,40 @@ export function generateAllSegments(lensData: Lens[]): MicroSegment[][] {
   })
 }
 
-// 计算笛卡尔积
-export function cartesianProduct<T>(arrays: T[][]): T[][] {
-  return arrays.reduce<T[][]>(
-    (acc, current) => {
-      return acc.flatMap(x => current.map(y => [...x, y]))
+// 生成随机片段
+export function generateRandomSegmentForLens(lens: Lens): MicroSegment {
+  const randomVideo = lens.videos[Math.floor(Math.random() * lens.videos.length)]
+  const randomStartTime = Math.floor(Math.random() * (randomVideo.duration - lens.duration))
+  const randomEndTime = randomStartTime + lens.duration
+
+  return {
+    lens: lens.lens,
+    id: randomVideo.id,
+    path: randomVideo.path,
+    duration: randomVideo.duration,
+    choose_time: {
+      start: randomStartTime,
+      end: randomEndTime
     },
-    [[]]
-  )
+    video_name: `lens_${lens.lens}_video_${randomVideo.id}_segment.mp4`
+  }
 }
 
-// 生成所有可能的微序列
-export function generateAllMicroSequences(lensData: Lens[], targetCount: number): MicroSequence[] {
-  const allSegments = generateAllSegments(lensData)
-  if (allSegments.length === 0) {
-    console.warn('警告：没有有效的片段数据')
-    return []
+// 随机生成可能的微序列
+export function generateRandomMicroSequences(lensData: Lens[], targetCount: number): MicroSequence[] {
+  const sequences: MicroSequence[] = []
+
+  // 生成随机的微序列
+  for (let i = 0; i < targetCount; i++) {
+    const sequence: MicroSequence = []
+    for (const lens of lensData) {
+      const segment = generateRandomSegmentForLens(lens)
+      sequence.push(segment)
+    }
+    sequences.push(sequence)
   }
 
-  // 生成所有可能的组合
-  const allMicroSequences = cartesianProduct(allSegments)
-
-  // 如果目标数量大于所有可能的组合数量，则返回所有组合
-  if (targetCount >= allMicroSequences.length) {
-    return allMicroSequences
-  }
-
-  // 否则返回前 targetCount 个组合
-  return allMicroSequences.slice(0, targetCount)
+  return sequences
 }
 
 // 检查微序列合法性
@@ -149,11 +155,8 @@ export function generateVideoSequences(initialData: Lens[], targetCount: number)
     return []
   }
 
-  // 2. 生成所有可能的微序列
-  const allMicroSequences = generateAllMicroSequences(validLenses, targetCount)
+  // 2. 生成随机微序列
+  const allMicroSequences = generateRandomMicroSequences(validLenses, targetCount)
 
-  // 3. 检查微序列合法性
-  const validSequences = validateMicroSequences(allMicroSequences)
-
-  return validSequences
+  return allMicroSequences
 }
