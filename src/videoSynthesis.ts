@@ -146,17 +146,47 @@ export function validateMicroSequences(microSequences: MicroSequence[]): MicroSe
   return validSequences
 }
 
+// 计算笛卡尔积
+export function cartesianProduct<T>(arrays: T[][]): T[][] {
+  return arrays.reduce<T[][]>(
+    (acc, current) => {
+      return acc.flatMap(x => current.map(y => [...x, y]))
+    },
+    [[]]
+  )
+}
+
+// 生成可能的微序列
+export function generateAllMicroSequences(lensData: Lens[], targetCount: number): MicroSequence[] {
+  const allSegments = generateAllSegments(lensData)
+  if (allSegments.length === 0) {
+    console.warn('警告：没有有效的片段数据')
+    return []
+  }
+
+  // 生成所有可能的组合
+  const allMicroSequences = cartesianProduct(allSegments)
+
+  // 如果目标数量大于所有可能的组合数量，则返回所有组合
+  if (targetCount >= allMicroSequences.length) {
+    return allMicroSequences
+  }
+
+  // 否则返回前 targetCount 个组合
+  return allMicroSequences.slice(0, targetCount)
+}
+
 // 主函数
-export function generateVideoSequences(initialData: Lens[], targetCount: number): MicroSequence[] {
-  // 1. 数据有效性检查
+export function generateVideoSequences(initialData: Lens[], targetCount: number, random = true): MicroSequence[] {
   const validLenses = validateData(initialData)
   if (validLenses.length === 0) {
     console.warn('警告：没有有效的镜头数据')
     return []
   }
 
-  // 2. 生成随机微序列
-  const allMicroSequences = generateRandomMicroSequences(validLenses, targetCount)
+  if (random) {
+    return generateRandomMicroSequences(validLenses, targetCount)
+  }
 
-  return allMicroSequences
+  return generateAllMicroSequences(validLenses, targetCount)
 }

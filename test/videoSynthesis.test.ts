@@ -74,7 +74,7 @@ describe("视频合成服务单元测试", () => {
     describe("generateSegmentsForVideo", () => {
         it("应为5秒视频生成2个片段", () => {
             const video: Video = { id: "video_1", path: "video_1.mp4", duration: 5 };
-            const segments = generateSegmentsForVideo(video, 1);
+            const segments = generateSegmentsForVideo(video, { lens: 1, duration: 2, videos: [] });
             expect(segments.length).to.equal(2);
             expect(segments[0].choose_time).to.deep.equal({
                 start: 0,
@@ -88,7 +88,7 @@ describe("视频合成服务单元测试", () => {
 
         it("应为6秒视频生成3个片段", () => {
             const video: Video = { id: "video_1", path: "video_1.mp4", duration: 6 };
-            const segments = generateSegmentsForVideo(video, 1);
+            const segments = generateSegmentsForVideo(video, { lens: 1, duration: 2, videos: [] });
             expect(segments.length).to.equal(3);
             expect(segments[2].choose_time).to.deep.eq({
                 start: 4,
@@ -98,7 +98,7 @@ describe("视频合成服务单元测试", () => {
 
         it("应跳过结束时间超过视频时长的片段", () => {
             const video: Video = { id: "video_1", path: "video_1.mp4", duration: 3 };
-            const segments = generateSegmentsForVideo(video, 1);
+            const segments = generateSegmentsForVideo(video, { lens: 1, duration: 2, videos: [] });
             expect(segments.length).to.equal(1);
             expect(segments[0].choose_time).to.deep.equal({
                 start: 0,
@@ -293,7 +293,7 @@ describe("视频合成服务单元测试", () => {
                     ],
                 },
             ];
-            const result = generateVideoSequences(data, 10); // 目标数量为10
+            const result = generateVideoSequences(data, 10, false); // 目标数量为10
             expect(result.length).to.equal(6); // 2 * 3 = 6
         });
 
